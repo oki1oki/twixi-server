@@ -1,6 +1,6 @@
-import type { Request, Response } from 'express'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 
 export interface GQLContext {
-	req: Request
-	res: Response
+	req: FastifyRequest
+	reply: FastifyReply
 }

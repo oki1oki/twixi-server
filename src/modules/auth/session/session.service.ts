@@ -6,9 +6,8 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { verify } from 'argon2'
-import type { Request } from 'express'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import { PrismaService } from 'src/core/prisma/prisma.service'
-import { parseBoolean } from 'src/shared/utils/parse-boolean.util'
 
 import { LoginInput } from './inputs/login.input'
 
@@ -19,7 +18,7 @@ export class SessionService {
 		private readonly configSerivce: ConfigService
 	) {}
 
-	async login(req: Request, input: LoginInput) {
+	async login(req: FastifyRequest, input: LoginInput) {
 		const { email, password } = input
 
 		const user = await this.prismaService.user.findUnique({
@@ -51,7 +50,7 @@ export class SessionService {
 		})
 	}
 
-	async logout(req: Request) {
+	async logout(req: FastifyRequest) {
 		return new Promise((resolve, reject) => {
 			req.session.destroy(err => {
 				if (err)
@@ -60,10 +59,6 @@ export class SessionService {
 							`Ошибка при завершении сессии: ${err}`
 						)
 					)
-
-				req.res.clearCookie(
-					this.configSerivce.getOrThrow<string>('SESSION_NAME')
-				)
 
 				resolve(true)
 			})
