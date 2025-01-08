@@ -1,0 +1,22 @@
+model Transaction {
+    id String @id @default(cuid())
+
+    amount   Float
+    currency String
+
+    status TransactionStatus @default(PENDING)
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("transactions")
+}
+
+enum TransactionStatus {
+    PENDING
+    SUCCESS
+    CANCELLED
+    EXPIRED
+
+    @@map("transaction_statuses")
+}

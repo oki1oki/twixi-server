@@ -1,0 +1,22 @@
+model Token {
+    id String @id @default(cuid())
+
+    token   String    @unique
+    type    TokenType
+    expires DateTime
+    userId  String    @map("user_id")
+    user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now()) @map("created_at")
+
+    @@map("tokens")
+}
+
+enum TokenType {
+    EMAIL_VERIFY
+    PASSWORD_RESET
+    DEACTIVATE_ACCOUNT
+    TELEGRAM_AUTH
+
+    @@map("token_types")
+}

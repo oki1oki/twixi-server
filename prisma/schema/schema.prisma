@@ -1,0 +1,49 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URl")
+}
+
+model User {
+  id String @id @default(cuid())
+
+  username    String  @unique
+  email       String  @unique
+  displayName String  @map("display_name")
+  password    String
+  isVerified  Boolean @default(false) @map("is_verified")
+
+  avatar String?
+  bio    String?
+
+  socialLinks   SocialLink[]
+  notifications Notification[]
+  tokens        Token[]
+
+  sponsorshipPlans SponsorshipPlan[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model SocialLink {
+  id String @id @default(cuid())
+
+  title    String
+  url      String
+  position Int
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("social_links")
+}

@@ -1,0 +1,33 @@
+model SponsorshipPlan {
+    id String @id @default(cuid())
+
+    title       String
+    description String?
+    price       Float
+
+    userId String @map("user_id")
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    sponsorshipSubscriptions SponsorshipSubscription[]
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("sponsorship_plans")
+}
+
+model SponsorshipSubscription {
+    id String @id @default(cuid())
+
+    title       String
+    description String?
+    price       Float
+
+    planId String?          @map("plan_id")
+    plan   SponsorshipPlan? @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("sponsorship_subscriptions")
+}
