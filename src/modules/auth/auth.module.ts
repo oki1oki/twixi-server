@@ -1,10 +1,20 @@
-import { Module } from '@nestjs/common'
-
-import { AccountModule } from './account/account.module'
-import { SessionModule } from './session/session.module'
+import { Module } from "@nestjs/common"
+import { AccountModule } from "./account/account.module"
+import { AuthResolver } from "./auth.resolver"
+import { AuthService } from "./auth.service"
+import { PasswordRecoveryModule } from "./password-recovery/password-recovery.module"
+import { SessionModule } from "./session/session.module"
+import { TotpModule } from "./totp/totp.module"
+import { VerificationModule } from "./verification/verification.module"
 
 @Module({
-	imports: [AccountModule, SessionModule],
-	exports: [AccountModule, SessionModule]
+	imports: [
+		AccountModule,
+		SessionModule,
+		VerificationModule,
+		PasswordRecoveryModule,
+		TotpModule
+	],
+	providers: [AuthResolver, AuthService]
 })
 export class AuthModule {}

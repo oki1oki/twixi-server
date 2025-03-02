@@ -1,0 +1,10 @@
+model ActionAttempt {
+    id String @id @default(cuid())
+
+    type TokenType
+
+    userId String @map("user_id")
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now()) @map("created_at")
+}

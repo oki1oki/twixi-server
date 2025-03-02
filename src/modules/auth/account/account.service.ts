@@ -1,15 +1,30 @@
-import { ConflictException, Injectable } from '@nestjs/common'
-import { hash } from 'argon2'
-import { PrismaService } from 'src/core/prisma/prisma.service'
-
-import { CreateUserInput } from './inputs/create-user.input'
+import { ConflictException, Injectable } from "@nestjs/common"
+import { hash } from "argon2"
+import { PrismaService } from "src/core/prisma/prisma.service"
+import { VerificationService } from "../verification/verification.service"
+import { CreateUserInput } from "./inputs/create-user.input"
 
 @Injectable()
 export class AccountService {
-	constructor(private readonly prismaService: PrismaService) {}
+	constructor(
+		private readonly prismaService: PrismaService,
+		private readonly verificationService: VerificationService
+	) {}
 
-	async getAll() {
-		return this.prismaService.user.findMany()
+	async findMe(id: string) {
+		return this.prismaService.user.findUnique({
+			where: {
+				id
+			}
+		})
+	}
+
+	async findByEmail(email: string) {
+		return this.prismaService.user.findUnique({
+			where: {
+				email
+			}
+		})
 	}
 
 	async create(input: CreateUserInput) {
@@ -22,7 +37,7 @@ export class AccountService {
 		})
 
 		if (isUsernameExists)
-			throw new ConflictException('Это имя пользователя уже занято')
+			throw new ConflictException("Это имя пользователя уже занято")
 
 		const isEmailExisting = await this.prismaService.user.findUnique({
 			where: {
@@ -30,9 +45,9 @@ export class AccountService {
 			}
 		})
 
-		if (isEmailExisting) throw new ConflictException('Эта почта уже занята')
+		if (isEmailExisting) throw new ConflictException("Эта почта уже занята")
 
-		await this.prismaService.user.create({
+		const user = await this.prismaService.user.create({
 			data: {
 				username,
 				email,
@@ -40,6 +55,8 @@ export class AccountService {
 				displayName
 			}
 		})
+
+		await this.verificationService.sendVerificationToken(user)
 
 		return true
 	}

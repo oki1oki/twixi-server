@@ -1,11 +1,11 @@
 model Token {
     id String @id @default(cuid())
 
-    token   String    @unique
-    type    TokenType
-    expires DateTime
-    userId  String    @map("user_id")
-    user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    token     String    @unique
+    type      TokenType
+    expiresIn DateTime  @map("expires_in")
+    userId    String    @map("user_id")
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now()) @map("created_at")
 

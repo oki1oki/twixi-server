@@ -1,67 +1,129 @@
 import {
-	BadRequestException,
+	ConflictException,
 	Injectable,
 	InternalServerErrorException,
 	NotFoundException
-} from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
-import { verify } from 'argon2'
-import type { FastifyReply, FastifyRequest } from 'fastify'
-import { PrismaService } from 'src/core/prisma/prisma.service'
-
-import { LoginInput } from './inputs/login.input'
+} from "@nestjs/common"
+import { ConfigService } from "@nestjs/config"
+import type { User } from "@prisma/client"
+import type { FastifyRequest } from "fastify"
+import { RedisService } from "src/core/redis/redis.service"
+import type { SessionMetadata } from "src/shared/utils/types/session-metadata.type"
 
 @Injectable()
 export class SessionService {
 	constructor(
-		private readonly prismaService: PrismaService,
+		private readonly redisService: RedisService,
 		private readonly configSerivce: ConfigService
 	) {}
 
-	async login(req: FastifyRequest, input: LoginInput) {
-		const { email, password } = input
+	async findByUser(req: FastifyRequest) {
+		const userId = req.session.userId
 
-		const user = await this.prismaService.user.findUnique({
-			where: {
-				email
+		if (!userId) {
+			throw new NotFoundException("Пользователь не имеет активных сессий")
+		}
+
+		const sessionIds = await this.redisService.smembers(
+			`user:${userId}:sessions`
+		)
+
+		if (!sessionIds.length) {
+			throw new NotFoundException("Активные сессии не найдены")
+		}
+
+		const userSessions = []
+
+		for (const sessionId of sessionIds) {
+			const session = await this.redisService.get(`sessions:${sessionId}`)
+			if (session) {
+				const sessionData = JSON.parse(session)
+				userSessions.push({
+					...sessionData,
+					id: sessionId
+				})
 			}
-		})
+		}
 
-		if (!user) throw new NotFoundException('Неверная почта')
+		userSessions.sort((a, b) => b.createdAt - a.createdAt)
 
-		const isPasswordValid = await verify(user.password, password)
-
-		if (!isPasswordValid) throw new BadRequestException('Неверный пароль')
-
-		return new Promise((resolve, reject) => {
-			req.session.createdAt = new Date()
-			req.session.userId = user.id
-
-			req.session.save(err => {
-				if (err)
-					return reject(
-						new InternalServerErrorException(
-							`Ошибка при сохранении сессии: ${err}`
-						)
-					)
-
-				resolve(user)
-			})
-		})
+		return userSessions.filter(session => session.id !== req.session.sessionId)
 	}
 
-	async logout(req: FastifyRequest) {
-		return new Promise((resolve, reject) => {
-			req.session.destroy(err => {
-				if (err)
-					return reject(
-						new InternalServerErrorException(
-							`Ошибка при завершении сессии: ${err}`
-						)
-					)
+	async findCurrent(req: FastifyRequest) {
+		const sessionId = req.session.sessionId
 
-				resolve(true)
+		const session = await this.redisService.get(
+			`${this.configSerivce.getOrThrow<string>("SESSION_FOLDER")}${sessionId}`
+		)
+
+		return {
+			...JSON.parse(session),
+			id: sessionId
+		}
+	}
+
+	async removeById(req: FastifyRequest, id: string) {
+		if (req.session.sessionId === id) {
+			throw new ConflictException("Нельзя удалить текущую сессию")
+		}
+
+		await this.redisService.del(
+			`${this.configSerivce.getOrThrow<string>("SESSION_FOLDER")}${id}`
+		)
+
+		await this.redisService.srem(`user:${req.session.userId}:sessions`, id)
+
+		return true
+	}
+
+	async save(req: FastifyRequest, user: User, metadata: SessionMetadata) {
+		try {
+			req.session.createdAt = new Date()
+			req.session.metadata = metadata
+			req.session.userId = user.id
+
+			await this.redisService.sadd(
+				`user:${user.id}:sessions`,
+				req.session.sessionId
+			)
+
+			await new Promise<void>((resolve, reject) => {
+				req.session.save(err => {
+					if (err) return reject(err)
+
+					resolve()
+				})
 			})
-		})
+
+			return user
+		} catch (error) {
+			throw new InternalServerErrorException(
+				`Ошибка при сохранении сессии: ${error}`
+			)
+		}
+	}
+
+	async destroy(req: FastifyRequest) {
+		try {
+			await this.redisService.srem(
+				`user:${req.session.userId}:sessions`,
+				req.session.sessionId
+			)
+
+			await new Promise<void>((resolve, reject) => {
+				req.session.destroy(err => {
+					if (err) return reject(err)
+
+					resolve()
+				})
+			})
+
+			return true
+		} catch (error) {
+			throw new InternalServerErrorException(
+				`Ошибка при завершении сессии: ${error}`
+			)
+		}
 	}
 }

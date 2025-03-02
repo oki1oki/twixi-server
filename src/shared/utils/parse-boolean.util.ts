@@ -1,15 +1,15 @@
 export function parseBoolean(value: string | boolean): boolean {
-	if (typeof value === 'boolean') {
+	if (typeof value === "boolean") {
 		return value
 	}
 
-	if (typeof value === 'string') {
+	if (typeof value === "string") {
 		const lowerCaseValue = value.toLowerCase()
 
-		if (lowerCaseValue === 'true') {
+		if (lowerCaseValue === "true") {
 			return true
 		}
-		if (lowerCaseValue === 'false') {
+		if (lowerCaseValue === "false") {
 			return false
 		}
 	}

@@ -1,12 +1,12 @@
-import { ApolloDriver } from '@nestjs/apollo'
-import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
-import { GraphQLModule } from '@nestjs/graphql'
-import { AuthModule } from 'src/modules/auth/auth.module'
-
-import { getGraphQLConfig } from './config/graphql.config'
-import { PrismaModule } from './prisma/prisma.module'
-import { RedisModule } from './redis/redis.module'
+import { ApolloDriver } from "@nestjs/apollo"
+import { Module } from "@nestjs/common"
+import { ConfigModule, ConfigService } from "@nestjs/config"
+import { GraphQLModule } from "@nestjs/graphql"
+import { AuthModule } from "src/modules/auth/auth.module"
+import { LibsModule } from "src/modules/libs/libs.module"
+import { getGraphQLConfig } from "./config/graphql.config"
+import { PrismaModule } from "./prisma/prisma.module"
+import { RedisModule } from "./redis/redis.module"
 
 @Module({
 	imports: [
@@ -16,6 +16,7 @@ import { RedisModule } from './redis/redis.module'
 			driver: ApolloDriver,
 			useFactory: getGraphQLConfig
 		}),
+		LibsModule,
 		PrismaModule,
 		RedisModule,
 		AuthModule
