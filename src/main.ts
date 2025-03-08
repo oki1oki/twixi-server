@@ -1,5 +1,5 @@
-import fastifyCookie from "@fastify/cookie"
-import fastifySession from "@fastify/session"
+import { fastifyCookie } from "@fastify/cookie"
+import { fastifySession } from "@fastify/session"
 import { ValidationPipe } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { NestFactory } from "@nestjs/core"
@@ -42,12 +42,7 @@ async function bootstrap() {
 		})
 	})
 
-	app.useGlobalPipes(
-		new ValidationPipe({
-			transform: true,
-			whitelist: true
-		})
-	)
+	app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }))
 
 	app.enableCors({
 		origin: config.getOrThrow<string>("ALLOWED_ORIGIN"),
