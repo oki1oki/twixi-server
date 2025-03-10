@@ -12,5 +12,5 @@ export class EnableTotpInput {
 	@IsString()
 	@IsNotEmpty()
 	@Length(6, 6)
-	pin: string
+	token: string
 }

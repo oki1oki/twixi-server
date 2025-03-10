@@ -18,8 +18,12 @@ model User {
 
   isVerified      Boolean @default(false) @map("is_verified")
   isEmailVerified Boolean @default(false) @map("is_email_verified")
-  isTotpEnable    Boolean @default(false) @map("is_totp_enabled")
-  totpSecret      String? @map("totp_secret")
+
+  isTotpEnable Boolean @default(false) @map("is_totp_enabled")
+  totpSecret   String? @map("totp_secret")
+
+  isDeactivated Boolean   @default(false) @map("is_deactivated")
+  deacivatedAt  DateTime? @map("deactivated_at")
 
   avatar String?
   bio    String?

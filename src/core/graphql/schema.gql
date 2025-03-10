@@ -19,6 +19,12 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input DeactivateAccountInput {
+  email: String!
+  password: String!
+  token: String
+}
+
 type DeviceModel {
   browser: BaseInfoModel!
   model: String!
@@ -28,8 +34,8 @@ type DeviceModel {
 }
 
 input EnableTotpInput {
-  pin: String!
   secret: String!
+  token: String!
 }
 
 type LocationModel {
@@ -46,6 +52,7 @@ input LoginInput {
 }
 
 type Mutation {
+  deactivateAccount(data: DeactivateAccountInput!): UserModel!
   disableTotp: Boolean!
   enableTotp(data: EnableTotpInput!): Boolean!
   loginUser(data: LoginInput!): UserModel!
@@ -95,9 +102,11 @@ type UserModel {
   avatar: String
   bio: String
   createdAt: DateTime!
+  deacivatedAt: DateTime!
   displayName: String!
   email: String!
   id: ID!
+  isDeactivated: Boolean!
   isEmailVerified: Boolean!
   isTotpEnable: Boolean!
   isVerified: Boolean!

@@ -30,7 +30,7 @@ export class TotpService {
 	}
 
 	async enable(user: User, input: EnableTotpInput) {
-		const { secret, pin } = input
+		const { secret, token } = input
 
 		const totp = new TOTP({
 			issuer: "Twixi",
@@ -43,7 +43,7 @@ export class TotpService {
 
 		console.log(totp.generate())
 
-		const delta = totp.validate({ token: pin })
+		const delta = totp.validate({ token })
 
 		if (delta === null) throw new BadRequestException("Неверный код")
 

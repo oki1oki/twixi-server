@@ -6,6 +6,7 @@ import { PasswordRecoveryModule } from "./password-recovery/password-recovery.mo
 import { SessionModule } from "./session/session.module"
 import { TotpModule } from "./totp/totp.module"
 import { VerificationModule } from "./verification/verification.module"
+import { DeactivateModule } from './deactivate/deactivate.module';
 
 @Module({
 	imports: [
@@ -13,7 +14,8 @@ import { VerificationModule } from "./verification/verification.module"
 		SessionModule,
 		VerificationModule,
 		PasswordRecoveryModule,
-		TotpModule
+		TotpModule,
+		DeactivateModule
 	],
 	providers: [AuthResolver, AuthService]
 })
