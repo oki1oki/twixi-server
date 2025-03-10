@@ -17,6 +17,11 @@
 		"strictBindCallApply": false,
 		"forceConsistentCasingInFileNames": false,
 		"noFallthroughCasesInSwitch": false,
-		"jsx": "react"
+		"jsx": "react",
+		"paths": {
+			"@as-integrations/fastify": [
+				"node_modules/@nitra/as-integrations-fastify"
+			]
+		}
 	}
 }

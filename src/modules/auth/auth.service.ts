@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common"
 import { verify } from "argon2"
 import { FastifyRequest } from "fastify"
+import { TOTP } from "otpauth"
 import { getSessionMetadata } from "src/shared/utils/session-metadata.util"
 import { AccountService } from "./account/account.service"
 import { CreateUserInput } from "./account/inputs/create-user.input"
@@ -25,7 +26,7 @@ export class AuthService {
 	}
 
 	async login(req: FastifyRequest, input: LoginInput, userAgent: string) {
-		const { email, password } = input
+		const { email, password, pin } = input
 
 		const user = await this.accountService.findByEmail(email)
 
@@ -40,6 +41,23 @@ export class AuthService {
 			throw new BadRequestException(
 				"Ваша почта не подтверждена. Пожалуйста, проверьте свою почту для подтверждения."
 			)
+		}
+
+		if (user.isTotpEnable) {
+			if (!pin) throw new BadRequestException("Не передан код для TOTP")
+
+			const totp = new TOTP({
+				issuer: "Twixi",
+				label: user.email,
+				algorithm: "SHA1",
+				digits: 6,
+				period: 30,
+				secret: user.totpSecret
+			})
+
+			const delta = totp.validate({ token: pin })
+
+			if (delta === null) throw new BadRequestException("Неверный код")
 		}
 
 		const sessionMetadata = getSessionMetadata(req, userAgent)
