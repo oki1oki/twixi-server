@@ -43,9 +43,25 @@ export class DeactivateService {
 			)
 		}
 
-		await this.validateDeactivateToken(req, token)
+		const validToken = await this.validateDeactivateToken(req, token)
 
-		console.log(user)
+		await this.prismaService.user.update({
+			where: {
+				id: user.id
+			},
+			data: {
+				isDeactivated: true,
+				deacivatedAt: new Date()
+			}
+		})
+
+		await this.prismaService.token.delete({
+			where: {
+				id: validToken.id
+			}
+		})
+
+		await this.sessionService.destroy(req)
 
 		return user
 	}
@@ -67,23 +83,7 @@ export class DeactivateService {
 			throw new BadRequestException("Время действия токена истекло")
 		}
 
-		await this.prismaService.user.update({
-			where: {
-				id: existingToken.userId
-			},
-			data: {
-				isDeactivated: true,
-				deacivatedAt: new Date()
-			}
-		})
-
-		await this.prismaService.token.delete({
-			where: {
-				id: existingToken.id
-			}
-		})
-
-		return this.sessionService.destroy(req)
+		return existingToken
 	}
 
 	async sendDeactivateToken(

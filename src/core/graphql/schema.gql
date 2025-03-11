@@ -33,6 +33,12 @@ type DeviceModel {
   vendor: String!
 }
 
+input EmailChangeInput {
+  newEmail: String!
+  newEmailToken: String
+  oldEmailToken: String
+}
+
 input EnableTotpInput {
   secret: String!
   token: String!
@@ -52,6 +58,7 @@ input LoginInput {
 }
 
 type Mutation {
+  changeEmail(data: EmailChangeInput!): Boolean!
   deactivateAccount(data: DeactivateAccountInput!): UserModel!
   disableTotp: Boolean!
   enableTotp(data: EnableTotpInput!): Boolean!

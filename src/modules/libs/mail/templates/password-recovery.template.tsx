@@ -8,10 +8,10 @@ import {
 	Section,
 	Tailwind,
 	Text
-} from '@react-email/components'
-import * as React from 'react'
-import type { SessionMetadata } from 'src/shared/utils/types/session-metadata.type'
-import { MetadataTemplate } from './metadata.template'
+} from "@react-email/components"
+import * as React from "react"
+import type { SessionMetadata } from "src/shared/utils/types/session-metadata.type"
+import { MetadataTemplate } from "./metadata.template"
 
 interface IPasswordRecoveryTemplateProps {
 	domain: string
@@ -27,7 +27,7 @@ export function PasswordRecoveryTemplate({
 	const resetLink = `${domain}/aссount/recovery?token=${token}`
 
 	return (
-		<Html className='text-black'>
+		<Html>
 			<Head />
 			<Preview>Восстановление пароля</Preview>
 

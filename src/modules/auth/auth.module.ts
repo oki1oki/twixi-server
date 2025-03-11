@@ -7,6 +7,7 @@ import { SessionModule } from "./session/session.module"
 import { TotpModule } from "./totp/totp.module"
 import { VerificationModule } from "./verification/verification.module"
 import { DeactivateModule } from './deactivate/deactivate.module';
+import { EmailChangeModule } from './email-change/email-change.module';
 
 @Module({
 	imports: [
@@ -15,7 +16,8 @@ import { DeactivateModule } from './deactivate/deactivate.module';
 		VerificationModule,
 		PasswordRecoveryModule,
 		TotpModule,
-		DeactivateModule
+		DeactivateModule,
+		EmailChangeModule
 	],
 	providers: [AuthResolver, AuthService]
 })

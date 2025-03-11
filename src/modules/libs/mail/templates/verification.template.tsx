@@ -8,8 +8,8 @@ import {
 	Section,
 	Tailwind,
 	Text
-} from '@react-email/components'
-import * as React from 'react'
+} from "@react-email/components"
+import * as React from "react"
 
 interface IVerificationTemplateProps {
 	domain: string
@@ -31,7 +31,7 @@ export function VerificationTemplate({
 				<Body className='p-6 max-w-2xl mx-auto bg-slate-50 text-black'>
 					<Section className='text-center mb-4'>
 						<Heading className='text-2xl font-bold'>
-							Благодарим вас за регистрацию в нашем сервисе!
+							Благодарим вас за выбор нашего сервиса!
 						</Heading>
 						<Text className='text-lg'>
 							Для подтверждения вашей электронной почты, пожалуйста, перейдите
