@@ -42,8 +42,9 @@ export class MailService {
 		metadata: SessionMetadata,
 		isNewEmail: boolean
 	) {
+		const domain = this.configService.getOrThrow<string>("ALLOWED_ORIGIN")
 		const html = await render(
-			EmailChangeTemplate({ token, metadata, isNewEmail })
+			EmailChangeTemplate({ domain, token, metadata, isNewEmail })
 		)
 
 		return this.sendMail(email, "Смена почты", html)

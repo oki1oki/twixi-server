@@ -5,18 +5,28 @@ import { Authorized } from "src/shared/decorators/authorized.decorator"
 import { UserAgent } from "src/shared/decorators/user-agent.decorator"
 import { GQLContext } from "src/shared/utils/types/gql-context.type"
 import { EmailChangeService } from "./email-change.service"
-import { EmailChangeInput } from "./inputs/email-change.input"
+import { ChangeEmailInput } from "./inputs/change-email.input"
 
 @Resolver()
 export class EmailChangeResolver {
 	constructor(private readonly emailChangeService: EmailChangeService) {}
 
 	@Authorization()
-	@Mutation(() => Boolean, { name: "changeEmail" })
-	async verifyOldEmail(
+	@Mutation(() => Boolean, { name: "sendLinkToOldEmail" })
+	async sendLinkToOldEmail(
 		@Context() { req }: GQLContext,
-		@Args("data") input: EmailChangeInput,
 		@Authorized() user: User,
+		@UserAgent() userAgent: string
+	) {
+		return this.emailChangeService.sendEmailToken(req, user, userAgent)
+	}
+
+	@Authorization()
+	@Mutation(() => Boolean, { name: "changeEmail" })
+	async changeEmail(
+		@Context() { req }: GQLContext,
+		@Authorized() user: User,
+		@Args("data") input: ChangeEmailInput,
 		@UserAgent() userAgent: string
 	) {
 		return this.emailChangeService.change(req, input, user, userAgent)

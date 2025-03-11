@@ -1,16 +1,12 @@
 import { Module } from "@nestjs/common"
-import { SessionService } from "../session/session.service"
-import { VerificationService } from "../verification/verification.service"
+import { SessionModule } from "../session/session.module"
+import { VerificationModule } from "../verification/verification.module"
 import { AccountResolver } from "./account.resolver"
 import { AccountService } from "./account.service"
 
 @Module({
-	providers: [
-		AccountResolver,
-		AccountService,
-		VerificationService,
-		SessionService
-	],
+	imports: [VerificationModule, SessionModule],
+	providers: [AccountResolver, AccountService],
 	exports: [AccountService]
 })
 export class AccountModule {}

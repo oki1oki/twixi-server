@@ -1,9 +1,11 @@
 import { Module } from "@nestjs/common"
-import { SessionService } from "../session/session.service"
+import { TokenModule } from "src/core/token/token.module"
+import { SessionModule } from "../session/session.module"
 import { DeactivateResolver } from "./deactivate.resolver"
 import { DeactivateService } from "./deactivate.service"
 
 @Module({
-	providers: [DeactivateResolver, DeactivateService, SessionService]
+	imports: [SessionModule, TokenModule],
+	providers: [DeactivateResolver, DeactivateService]
 })
 export class DeactivateModule {}

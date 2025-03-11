@@ -3,7 +3,6 @@ import {
 	Head,
 	Heading,
 	Html,
-	Link,
 	Preview,
 	Section,
 	Tailwind,

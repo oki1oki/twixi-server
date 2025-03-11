@@ -1,14 +1,10 @@
-import {
-	BadRequestException,
-	Injectable,
-	NotFoundException
-} from "@nestjs/common"
+import { BadRequestException, Injectable } from "@nestjs/common"
 import { User } from "@prisma/client"
 import { verify } from "argon2"
 import type { FastifyRequest } from "fastify"
 import { PrismaService } from "src/core/prisma/prisma.service"
+import { TokenService } from "src/core/token/token.service"
 import { MailService } from "src/modules/libs/mail/mail.service"
-import { generateToken } from "src/shared/utils/generate-token.util"
 import { getSessionMetadata } from "src/shared/utils/session-metadata.util"
 import { SessionService } from "../session/session.service"
 import { DeactivateAccountInput } from "./inputs/deactivate-account.input"
@@ -18,7 +14,8 @@ export class DeactivateService {
 	constructor(
 		private readonly prismaService: PrismaService,
 		private readonly mailService: MailService,
-		private readonly sessionService: SessionService
+		private readonly sessionService: SessionService,
+		private readonly tokenService: TokenService
 	) {}
 
 	async deactivate(
@@ -43,7 +40,7 @@ export class DeactivateService {
 			)
 		}
 
-		const validToken = await this.validateDeactivateToken(req, token)
+		const validToken = await this.tokenService.validate(token)
 
 		await this.prismaService.user.update({
 			where: {
@@ -66,33 +63,12 @@ export class DeactivateService {
 		return user
 	}
 
-	private async validateDeactivateToken(req: FastifyRequest, token: string) {
-		const existingToken = await this.prismaService.token.findUnique({
-			where: {
-				token
-			}
-		})
-
-		if (!existingToken) {
-			throw new NotFoundException("Токен не существует")
-		}
-
-		const hasExpired = new Date(existingToken.expiresIn) < new Date()
-
-		if (hasExpired) {
-			throw new BadRequestException("Время действия токена истекло")
-		}
-
-		return existingToken
-	}
-
 	async sendDeactivateToken(
 		req: FastifyRequest,
 		user: User,
 		userAgent: string
 	) {
-		const deactivateToken = await generateToken(
-			this.prismaService,
+		const deactivateToken = await this.tokenService.generate(
 			user.id,
 			"DEACTIVATE_ACCOUNT",
 			false

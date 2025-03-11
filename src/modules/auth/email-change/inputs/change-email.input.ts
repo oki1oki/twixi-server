@@ -4,22 +4,22 @@ import {
 	IsNotEmpty,
 	IsOptional,
 	IsString,
+	IsUUID,
 	Length
 } from "class-validator"
 
 @InputType()
-export class EmailChangeInput {
+export class ChangeEmailInput {
 	@Field()
 	@IsEmail()
 	@IsNotEmpty()
 	newEmail: string
 
-	@Field({ nullable: true })
+	@Field()
 	@IsString()
-	@IsOptional()
-	@Length(6, 6)
+	@IsUUID()
 	@IsNotEmpty()
-	oldEmailToken?: string
+	oldEmailToken: string
 
 	@Field({ nullable: true })
 	@IsString()

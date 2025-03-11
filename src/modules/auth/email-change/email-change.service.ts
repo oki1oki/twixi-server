@@ -6,45 +6,38 @@ import {
 import { User } from "@prisma/client"
 import { FastifyRequest } from "fastify"
 import { PrismaService } from "src/core/prisma/prisma.service"
+import { TokenService } from "src/core/token/token.service"
 import { MailService } from "src/modules/libs/mail/mail.service"
-import { generateToken } from "src/shared/utils/generate-token.util"
 import { getSessionMetadata } from "src/shared/utils/session-metadata.util"
-import { EmailChangeInput } from "./inputs/email-change.input"
+import { ChangeEmailInput } from "./inputs/change-email.input"
 
 @Injectable()
 export class EmailChangeService {
 	constructor(
 		private readonly prismaService: PrismaService,
-		private readonly mailService: MailService
+		private readonly mailService: MailService,
+		private readonly tokenService: TokenService
 	) {}
 
 	async change(
 		req: FastifyRequest,
-		input: EmailChangeInput,
+		input: ChangeEmailInput,
 		user: User,
 		userAgent: string
 	) {
 		const { newEmail, oldEmailToken, newEmailToken } = input
 
-		if (!oldEmailToken) {
-			await this.sendEmailToken(req, user, userAgent, false)
-
-			throw new BadRequestException(
-				"Требуется код подтверждения с вашей старой почты"
-			)
-		}
-
-		const validOldToken = await this.validateToken(oldEmailToken)
+		const validOldToken = await this.tokenService.validate(oldEmailToken)
 
 		if (!newEmailToken) {
-			await this.sendEmailToken(req, user, userAgent, true)
+			await this.sendEmailToken(req, user, userAgent, newEmail)
 
 			throw new BadRequestException(
 				"Требуется код подтверждения с вашей новой почты"
 			)
 		}
 
-		const validNewToken = await this.validateToken(newEmailToken)
+		const validNewToken = await this.tokenService.validate(newEmailToken)
 
 		await this.prismaService.user.update({
 			where: {
@@ -57,53 +50,32 @@ export class EmailChangeService {
 
 		await this.prismaService.token.deleteMany({
 			where: {
-				id: validOldToken.id || validNewToken.id
+				OR: [{ id: validOldToken.id }, { id: validNewToken.id }]
 			}
 		})
 
 		return true
 	}
 
-	private async validateToken(token: string) {
-		const existingToken = await this.prismaService.token.findUnique({
-			where: {
-				token
-			}
-		})
-
-		if (!existingToken) {
-			throw new NotFoundException("Токен не существует")
-		}
-
-		const hasExpired = new Date(existingToken.expiresIn) < new Date()
-
-		if (hasExpired) {
-			throw new BadRequestException("Время действия токена истекло")
-		}
-
-		return existingToken
-	}
-
 	async sendEmailToken(
 		req: FastifyRequest,
 		user: User,
 		userAgent: string,
-		isNewEmail: boolean
+		newEmail?: string
 	) {
-		const token = await generateToken(
-			this.prismaService,
+		const token = await this.tokenService.generate(
 			user.id,
-			isNewEmail ? "NEW_EMAIL_VERIFY" : "OLD_EMAIL_VERIFY",
-			false
+			newEmail ? "NEW_EMAIL_VERIFY" : "OLD_EMAIL_VERIFY",
+			newEmail && false
 		)
 
 		const metadata = getSessionMetadata(req, userAgent)
 
 		await this.mailService.sendEmailChangeToken(
-			user.email,
+			newEmail ? newEmail : user.email,
 			token.token,
 			metadata,
-			isNewEmail
+			!!newEmail
 		)
 
 		return true

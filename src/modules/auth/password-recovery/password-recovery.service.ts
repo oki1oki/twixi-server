@@ -6,8 +6,8 @@ import {
 import { hash } from "argon2"
 import type { FastifyRequest } from "fastify"
 import { PrismaService } from "src/core/prisma/prisma.service"
+import { TokenService } from "src/core/token/token.service"
 import { MailService } from "src/modules/libs/mail/mail.service"
-import { generateToken } from "src/shared/utils/generate-token.util"
 import { isActionAllowed } from "src/shared/utils/is-action-allowed.util"
 import { getSessionMetadata } from "src/shared/utils/session-metadata.util"
 import { NewPasswordInput } from "./inputs/new-password.input"
@@ -17,7 +17,8 @@ import { ResetPasswordInput } from "./inputs/reset-password.input"
 export class PasswordRecoveryService {
 	constructor(
 		private readonly prismaService: PrismaService,
-		private readonly mailService: MailService
+		private readonly mailService: MailService,
+		private readonly tokenService: TokenService
 	) {}
 
 	async resetPassword(
@@ -53,8 +54,7 @@ export class PasswordRecoveryService {
 				"Вы совершили слишком много попыток, пожалуйста, попробуйте снова через 1 час."
 			)
 
-		const resetToken = await generateToken(
-			this.prismaService,
+		const resetToken = await this.tokenService.generate(
 			user.id,
 			"PASSWORD_RESET"
 		)
@@ -73,25 +73,11 @@ export class PasswordRecoveryService {
 	async newPassword(input: NewPasswordInput) {
 		const { token, password } = input
 
-		const existingToken = await this.prismaService.token.findUnique({
-			where: {
-				token
-			}
-		})
-
-		if (!existingToken) {
-			throw new NotFoundException("Токен не существует")
-		}
-
-		const hasExpired = new Date(existingToken.expiresIn) < new Date()
-
-		if (hasExpired) {
-			throw new BadRequestException("Время действия токена истекло")
-		}
+		const validToken = await this.tokenService.validate(token)
 
 		await this.prismaService.user.update({
 			where: {
-				id: existingToken.userId
+				id: validToken.userId
 			},
 			data: {
 				password: await hash(password)
@@ -100,7 +86,7 @@ export class PasswordRecoveryService {
 
 		await this.prismaService.token.delete({
 			where: {
-				id: existingToken.id
+				id: validToken.id
 			}
 		})
 

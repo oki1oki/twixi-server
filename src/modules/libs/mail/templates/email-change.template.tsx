@@ -14,16 +14,20 @@ import type { SessionMetadata } from "src/shared/utils/types/session-metadata.ty
 import { MetadataTemplate } from "./metadata.template"
 
 interface IPasswordRecoveryTemplateProps {
+	domain?: string
 	token: string
 	metadata: SessionMetadata
 	isNewEmail: boolean
 }
 
 export function EmailChangeTemplate({
+	domain,
 	token,
 	metadata,
 	isNewEmail
 }: IPasswordRecoveryTemplateProps) {
+	const changeLink = `${domain}/aссount/email-change?token=${token}`
+
 	return (
 		<Html>
 			<Head />
@@ -47,13 +51,29 @@ export function EmailChangeTemplate({
 						</Text>
 					</Section>
 					<Section className='bg-gray-100 rounded-lg p-5 text-center'>
-						<Heading className='text-2xl font-semibold'>
-							Код подтверждения
-						</Heading>
-						<Heading className='text-3xl font-semibold bg-white p-4 w-fit rounded-xl mx-auto'>
-							{token}
-						</Heading>
-						<Text>Код действителен в течение 5 минут</Text>
+						{isNewEmail ? (
+							<>
+								<Heading className='text-2xl font-semibold'>
+									Код подтверждения
+								</Heading>
+								<Heading className='text-3xl font-semibold bg-white p-4 w-fit rounded-xl mx-auto'>
+									{token}
+								</Heading>
+								<Text>Код действителен в течение 5 минут</Text>
+							</>
+						) : (
+							<>
+								<Text className='text-lg'>
+									Для смены почты перейдите по ссылке ниже
+								</Text>
+								<Link
+									href={changeLink}
+									className='inline-flex px-5 py-2 justify-center items-center rounded-lg bg-sky-500 font-medium text-lg text-white'
+								>
+									Сменить почту
+								</Link>
+							</>
+						)}
 					</Section>
 					{!isNewEmail && <MetadataTemplate metadata={metadata} />}
 				</Body>
