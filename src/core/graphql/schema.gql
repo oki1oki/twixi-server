@@ -13,6 +13,17 @@ input ChangeEmailInput {
   oldEmailToken: String!
 }
 
+input ChangePasswordInput {
+  newPassword: String!
+  oldPassword: String!
+}
+
+input ChangeProfileInfoInput {
+  bio: String!
+  displayName: String!
+  username: String!
+}
+
 input CreateUserInput {
   displayName: String!
   email: String!
@@ -58,7 +69,11 @@ input LoginInput {
 }
 
 type Mutation {
+  addSocialLink(data: SocialLinkInput!): Boolean!
   changeEmail(data: ChangeEmailInput!): Boolean!
+  changePassword(data: ChangePasswordInput!): Boolean!
+  changeProfileAvatar(avatar: Upload!): Boolean!
+  changeProfileInfo(data: ChangeProfileInfoInput!): Boolean!
   deactivateAccount(data: DeactivateAccountInput!): UserModel!
   disableTotp: Boolean!
   enableTotp(data: EnableTotpInput!): Boolean!
@@ -66,9 +81,13 @@ type Mutation {
   logoutUser: Boolean!
   newPassword(data: NewPasswordInput!): Boolean!
   registerUser(data: CreateUserInput!): Boolean!
+  removeProfileAvatar: Boolean!
   removeSession(id: String!): Boolean!
+  removeSocialLink(id: String!): Boolean!
+  reorderSocialLinks(data: [SocialLinkOrderInput!]!): Boolean!
   resetPassword(data: ResetPasswordInput!): Boolean!
   sendLinkToOldEmail: Boolean!
+  updateSocialLink(data: SocialLinkInput!, id: String!): Boolean!
   verifyAccount(data: VerificationInput!): Boolean!
 }
 
@@ -82,6 +101,7 @@ type Query {
   findProfile: UserModel!
   findSessionsByUser: [SessionModel!]!
   generateTotpSecret: TotpModel!
+  mySocialLinks: [SocialLinkModel!]!
 }
 
 input ResetPasswordInput {
@@ -101,10 +121,33 @@ type SessionModel {
   userId: String!
 }
 
+input SocialLinkInput {
+  title: String!
+  url: String!
+}
+
+type SocialLinkModel {
+  createdAt: DateTime!
+  id: ID!
+  position: Float!
+  title: String!
+  updatedAt: DateTime!
+  url: String!
+  userId: String!
+}
+
+input SocialLinkOrderInput {
+  id: String!
+  postition: Float!
+}
+
 type TotpModel {
   qrCodeUrl: String!
   secret: String!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 type UserModel {
   avatar: String
@@ -119,6 +162,7 @@ type UserModel {
   isTotpEnable: Boolean!
   isVerified: Boolean!
   password: String!
+  socialLinks: [SocialLinkModel!]!
   totpSecret: String!
   updatedAt: DateTime!
   username: String!

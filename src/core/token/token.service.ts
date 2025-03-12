@@ -42,11 +42,7 @@ export class TokenService {
 				token,
 				expiresIn,
 				type,
-				user: {
-					connect: {
-						id: userId
-					}
-				}
+				userId
 			},
 			include: {
 				user: true

@@ -1,4 +1,5 @@
 import { fastifyCookie } from "@fastify/cookie"
+import fastifyMultipart from "@fastify/multipart"
 import { fastifySession } from "@fastify/session"
 import { ValidationPipe } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
@@ -20,6 +21,13 @@ async function bootstrap() {
 	)
 	const config = app.get(ConfigService)
 	const redis = app.get(RedisService)
+
+	await app.register(fastifyMultipart, {
+		limits: {
+			fileSize: 10_000_000,
+			files: 20
+		}
+	})
 
 	await app.register(fastifyCookie, {
 		secret: config.getOrThrow<string>("COOKIES_SECRET")

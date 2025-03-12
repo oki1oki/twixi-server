@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common"
 import { ConfigModule } from "@nestjs/config"
 import { CoreModule } from "./core/core.module"
 import { IS_DEV_ENV } from "./shared/utils/is-dev.util"
-import { CronModule } from './modules/cron/cron.module';
 
 @Module({
 	imports: [
@@ -10,8 +9,7 @@ import { CronModule } from './modules/cron/cron.module';
 			ignoreEnvFile: !IS_DEV_ENV,
 			isGlobal: true
 		}),
-		CoreModule,
-		CronModule
+		CoreModule
 	]
 })
 export class AppModule {}

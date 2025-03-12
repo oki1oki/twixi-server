@@ -1,7 +1,14 @@
-import { ConflictException, Injectable } from "@nestjs/common"
-import { hash } from "argon2"
+import {
+	BadRequestException,
+	ConflictException,
+	Injectable,
+	NotFoundException
+} from "@nestjs/common"
+import { User } from "@prisma/client"
+import { hash, verify } from "argon2"
 import { PrismaService } from "src/core/prisma/prisma.service"
 import { VerificationService } from "../verification/verification.service"
+import { ChangePasswordInput } from "./inputs/change-password.input"
 import { CreateUserInput } from "./inputs/create-user.input"
 
 @Injectable()
@@ -15,6 +22,9 @@ export class AccountService {
 		return this.prismaService.user.findUnique({
 			where: {
 				id
+			},
+			include: {
+				socialLinks: true
 			}
 		})
 	}
@@ -57,6 +67,36 @@ export class AccountService {
 		})
 
 		await this.verificationService.sendVerificationToken(user)
+
+		return true
+	}
+
+	async changePassword(userId: string, input: ChangePasswordInput) {
+		const { oldPassword, newPassword } = input
+
+		if (oldPassword === newPassword)
+			throw new BadRequestException("Новый пароль должен отличаться от старого")
+
+		const existinguser = await this.prismaService.user.findUnique({
+			where: {
+				id: userId
+			}
+		})
+
+		if (!existinguser) throw new NotFoundException("Пользователь не найден")
+		const isPasswordValid = await verify(existinguser.password, oldPassword)
+
+		if (!isPasswordValid)
+			throw new BadRequestException("Неверный старый пароль")
+
+		await this.prismaService.user.update({
+			where: {
+				id: userId
+			},
+			data: {
+				password: await hash(newPassword)
+			}
+		})
 
 		return true
 	}

@@ -49,6 +49,17 @@ export class VerificationService {
 	}
 
 	async sendVerificationToken(user: User) {
+		const existingToken = await this.prismaService.token.findFirst({
+			where: {
+				userId: user.id,
+				type: "EMAIL_VERIFY"
+			}
+		})
+
+		if (existingToken && new Date(existingToken.expiresIn) < new Date()) {
+			return true
+		}
+
 		const verificationToken = await this.tokenService.generate(
 			user.id,
 			"EMAIL_VERIFY"
@@ -59,6 +70,6 @@ export class VerificationService {
 			verificationToken.token
 		)
 
-		return verificationToken
+		return true
 	}
 }

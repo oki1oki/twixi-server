@@ -1,27 +1,28 @@
 import { Field, InputType } from "@nestjs/graphql"
 import {
-	IsEmail,
 	IsNotEmpty,
 	IsOptional,
 	IsString,
-	Length
+	Matches,
+	MaxLength
 } from "class-validator"
 
 @InputType()
-export class ChangeEmailInput {
+export class ChangeProfileInfoInput {
 	@Field()
-	@IsEmail()
+	@IsString()
 	@IsNotEmpty()
-	newEmail: string
+	@Matches(/^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/)
+	username: string
 
 	@Field()
 	@IsString()
 	@IsNotEmpty()
-	oldEmailToken: string
+	displayName: string
 
-	@Field({ nullable: true })
+	@Field()
 	@IsString()
 	@IsOptional()
-	@Length(6, 6)
-	newEmailToken?: string
+	@MaxLength(250)
+	bio?: string
 }

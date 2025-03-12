@@ -5,6 +5,7 @@ import { GraphQLModule } from "@nestjs/graphql"
 import { AuthModule } from "src/modules/auth/auth.module"
 import { CronModule } from "src/modules/cron/cron.module"
 import { LibsModule } from "src/modules/libs/libs.module"
+import { ProfileModule } from "src/modules/profile/profile.module"
 import { getGraphQLConfig } from "./config/graphql.config"
 import { PrismaModule } from "./prisma/prisma.module"
 import { RedisModule } from "./redis/redis.module"
@@ -21,7 +22,8 @@ import { RedisModule } from "./redis/redis.module"
 		PrismaModule,
 		RedisModule,
 		AuthModule,
-		CronModule
+		CronModule,
+		ProfileModule
 	]
 })
 export class CoreModule {}

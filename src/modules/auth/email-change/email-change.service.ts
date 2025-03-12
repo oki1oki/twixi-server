@@ -29,6 +29,14 @@ export class EmailChangeService {
 
 		const validOldToken = await this.tokenService.validate(oldEmailToken)
 
+		const isEmailExists = await this.prismaService.user.findUnique({
+			where: {
+				email: newEmail
+			}
+		})
+
+		if (isEmailExists) throw new BadRequestException("Эта почта уже занята")
+
 		if (!newEmailToken) {
 			await this.sendEmailToken(req, user, userAgent, newEmail)
 
