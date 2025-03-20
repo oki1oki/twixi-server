@@ -37,7 +37,9 @@ export class AuthService {
 		if (!isPasswordValid) throw new BadRequestException("Неверный пароль")
 
 		if (user.isDeactivated)
-			throw new BadRequestException("Ваш аккаунт деактивирован")
+			throw new BadRequestException(
+				"Ваш аккаунт деактивирован, для восстановления обратитесь в службу поддержки"
+			)
 
 		if (!user.isEmailVerified) {
 			await this.verificationService.sendVerificationToken(user)

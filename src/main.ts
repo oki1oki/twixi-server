@@ -17,10 +17,22 @@ import { parseBoolean } from "./shared/utils/parse-boolean.util"
 async function bootstrap() {
 	const app = await NestFactory.create<NestFastifyApplication>(
 		AppModule,
-		new FastifyAdapter()
+		new FastifyAdapter(),
+		{ rawBody: true }
 	)
 	const config = app.get(ConfigService)
 	const redis = app.get(RedisService)
+
+	app
+		.getHttpAdapter()
+		.getInstance()
+		.addContentTypeParser(
+			"application/webhook+json",
+			{ parseAs: "string" },
+			(req, body, done) => {
+				done(null, body)
+			}
+		)
 
 	await app.register(fastifyMultipart, {
 		limits: {

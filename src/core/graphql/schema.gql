@@ -24,6 +24,15 @@ input ChangeProfileInfoInput {
   username: String!
 }
 
+input ChangeStreamInfoInput {
+  categoryId: String
+  id: ID!
+  isArchived: Boolean
+  isPrivate: Boolean
+  password: String
+  title: String
+}
+
 input CreateUserInput {
   displayName: String!
   email: String!
@@ -55,6 +64,12 @@ input EnableTotpInput {
   token: String!
 }
 
+input FiltersInput {
+  limit: Float
+  page: Float
+  searchTerm: String
+}
+
 type LocationModel {
   city: String!
   country: String!
@@ -68,12 +83,21 @@ input LoginInput {
   pin: String
 }
 
+type MetaModel {
+  limit: Int!
+  page: Int!
+  total: Int!
+}
+
 type Mutation {
   addSocialLink(data: SocialLinkInput!): Boolean!
   changeEmail(data: ChangeEmailInput!): Boolean!
   changePassword(data: ChangePasswordInput!): Boolean!
   changeProfileAvatar(avatar: Upload!): Boolean!
   changeProfileInfo(data: ChangeProfileInfoInput!): Boolean!
+  changeStreamInfo(data: ChangeStreamInfoInput!): Boolean!
+  changeStreamThumbnail(id: String!, thumbnail: Upload!): Boolean!
+  createIngress(ingressType: Float!): Boolean!
   deactivateAccount(data: DeactivateAccountInput!): UserModel!
   disableTotp: Boolean!
   enableTotp(data: EnableTotpInput!): Boolean!
@@ -84,6 +108,7 @@ type Mutation {
   removeProfileAvatar: Boolean!
   removeSession(id: String!): Boolean!
   removeSocialLink(id: String!): Boolean!
+  removeStreamThumbnail(id: String!): Boolean!
   reorderSocialLinks(data: [SocialLinkOrderInput!]!): Boolean!
   resetPassword(data: ResetPasswordInput!): Boolean!
   sendLinkToOldEmail: Boolean!
@@ -97,8 +122,10 @@ input NewPasswordInput {
 }
 
 type Query {
+  findAllStreams(filters: FiltersInput!): StreamResponseModel!
   findCurrentSession: SessionModel!
   findProfile: UserModel!
+  findRandomStream: StreamModel!
   findSessionsByUser: [SessionModel!]!
   generateTotpSecret: TotpModel!
   mySocialLinks: [SocialLinkModel!]!
@@ -141,6 +168,38 @@ input SocialLinkOrderInput {
   postition: Float!
 }
 
+type StreamModel {
+  archiveUrl: String
+  categoryId: String
+  createdAt: DateTime!
+  description: String
+  duration: Int!
+  endedAt: DateTime!
+  id: ID!
+  ingressId: String
+  isArchived: Boolean!
+  isLive: Boolean!
+  isPrivate: Boolean
+  isScheduled: Boolean
+  password: String
+  peakViewersCount: Int!
+  scheduledStartAt: DateTime
+  serverUrl: String
+  startedAt: DateTime!
+  streamKey: String
+  thumbnailId: String
+  thumbnailUrl: String
+  title: String!
+  updatedAt: DateTime!
+  userId: String!
+  viewersCount: Int!
+}
+
+type StreamResponseModel {
+  items: [StreamModel!]!
+  meta: MetaModel!
+}
+
 type TotpModel {
   qrCodeUrl: String!
   secret: String!
@@ -163,6 +222,7 @@ type UserModel {
   isVerified: Boolean!
   password: String!
   socialLinks: [SocialLinkModel!]!
+  streamId: ID
   totpSecret: String!
   updatedAt: DateTime!
   username: String!

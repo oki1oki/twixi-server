@@ -33,10 +33,15 @@ model User {
   tokens         Token[]
   actionAttempts ActionAttempt[]
 
+  stream Stream?
+
+  viewingSessions StreamViewer[]
+
   sponsorshipPlans SponsorshipPlan[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  streamId  String?
 
   @@map("users")
 }

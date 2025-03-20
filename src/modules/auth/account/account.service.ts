@@ -4,7 +4,6 @@ import {
 	Injectable,
 	NotFoundException
 } from "@nestjs/common"
-import { User } from "@prisma/client"
 import { hash, verify } from "argon2"
 import { PrismaService } from "src/core/prisma/prisma.service"
 import { VerificationService } from "../verification/verification.service"
@@ -62,7 +61,13 @@ export class AccountService {
 				username,
 				email,
 				password: await hash(password),
-				displayName
+				displayName,
+				stream: {
+					create: {
+						title: `Стрим ${username}`,
+						description: `Добро пожаловать на стрим ${username}`
+					}
+				}
 			}
 		})
 

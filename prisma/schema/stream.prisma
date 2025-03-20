@@ -1,0 +1,46 @@
+model Stream {
+    id String @id @default(cuid())
+
+    title        String
+    description  String?
+    thumbnailUrl String? @map("thumbnail_url")
+
+    ingressId String? @unique @map("ingress_id")
+    serverUrl String? @map("server_url")
+    streamKey String? @map("stream_key")
+
+    isLive Boolean @default(false) @map("is_live")
+
+    categoryId String?   @map("category_id")
+    category   Category? @relation(fields: [categoryId], references: [id])
+
+    isPrivate Boolean @default(false) @map("is_private")
+    password  String? @map("password")
+
+    userId String? @unique @map("user_id")
+    user   User?   @relation(fields: [userId], references: [id])
+
+    streamViewers StreamViewer[]
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    @@map("streams")
+}
+
+model StreamViewer {
+    id String @id @default(cuid())
+
+    userId String? @map("user_id")
+    user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+    sessionId String @unique @map("session_id")
+
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    streamId String @unique @map("stream_id")
+    stream   Stream @relation(fields: [streamId], references: [id])
+
+    @@map("stream_viewers")
+}
