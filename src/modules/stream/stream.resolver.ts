@@ -5,6 +5,8 @@ import { Authorization } from "src/shared/decorators/auth.decorator"
 import { FileValidationPipe } from "src/shared/pipes/file-validation.pipe"
 import { ChangeStreamInfoInput } from "./inputs/change-stream-info.input"
 import { FiltersInput } from "./inputs/filters.input"
+import { GenerateStreamTokenInput } from "./inputs/generate-stream-token.input"
+import { GenerateStreamTokenModel } from "./models/generate-stream-token.model"
 import { StreamResponseModel } from "./models/stream-response.model"
 import { StreamModel } from "./models/stream.model"
 import { StreamService } from "./stream.service"
@@ -45,5 +47,10 @@ export class StreamResolver {
 	@Mutation(() => Boolean, { name: "removeStreamThumbnail" })
 	async removeThumbnail(@Args("id") streamId: string) {
 		return this.streamService.removeThumbnail(streamId)
+	}
+
+	@Mutation(() => GenerateStreamTokenModel, { name: "generateStreamToken" })
+	async generateStreamToken(@Args("data") input: GenerateStreamTokenInput) {
+		return this.streamService.generateToken(input)
 	}
 }

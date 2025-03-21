@@ -1,15 +1,19 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
+import { ConfigService } from "@nestjs/config"
 import { Prisma } from "@prisma/client"
 import Upload from "graphql-upload/Upload.mjs"
+import { AccessToken } from "livekit-server-sdk"
 import sharp from "sharp"
 import { PrismaService } from "src/core/prisma/prisma.service"
 import { StorageService } from "src/modules/libs/storage/storage.service"
 import { ChangeStreamInfoInput } from "./inputs/change-stream-info.input"
+import { GenerateStreamTokenInput } from "./inputs/generate-stream-token.input"
 
 @Injectable()
 export class StreamService {
 	constructor(
 		private readonly prismaService: PrismaService,
+		private readonly configService: ConfigService,
 		private readonly storageService: StorageService
 	) {}
 
@@ -156,12 +160,59 @@ export class StreamService {
 		return true
 	}
 
+	async generateToken(input: GenerateStreamTokenInput) {
+		const { userId, channelId } = input
+
+		let self: { id: string; username: string }
+
+		const user = await this.prismaService.user.findUnique({
+			where: { id: userId }
+		})
+
+		if (user) {
+			self = { id: user.id, username: user.username }
+		} else {
+			self = {
+				id: userId,
+				username: `Зритель ${Math.floor(Math.random() * 1000000)}`
+			}
+		}
+
+		const channel = await this.prismaService.user.findUnique({
+			where: { id: channelId }
+		})
+
+		if (!channel) {
+			throw new NotFoundException("Канал не найден")
+		}
+
+		const isHost = self.id === channel.id
+
+		const token = new AccessToken(
+			this.configService.getOrThrow("LIVEKIT_API_KEY"),
+			this.configService.getOrThrow("LIVEKIT_API_SECRET"),
+			{
+				identity: isHost ? `Host-${self.id}` : self.id,
+				name: self.username
+			}
+		)
+
+		token.addGrant({
+			room: channel.id,
+			roomJoin: true,
+			canPublish: false
+		})
+
+		return { token: token.toJwt() }
+	}
 	async handleStreamLiveStatus(ingressId: string, isLive: boolean) {
 		const stream = await this.findStreamByIngressId(ingressId)
 
-		if (stream) {
-			await this.updateStreamLiveStatus(ingressId, isLive)
+		if (!stream) {
+			throw new NotFoundException("Стрим не найден")
 		}
+
+		await this.updateStreamLiveStatus(ingressId, isLive)
 	}
 
 	private async findStreamByIngressId(ingressId: string) {
