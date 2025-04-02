@@ -7,7 +7,7 @@ import { GQLContext } from "src/shared/utils/types/gql-context.type"
 import { EmailChangeService } from "./email-change.service"
 import { ChangeEmailInput } from "./inputs/change-email.input"
 
-@Resolver()
+@Resolver("EmailChange")
 export class EmailChangeResolver {
 	constructor(private readonly emailChangeService: EmailChangeService) {}
 

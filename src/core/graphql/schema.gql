@@ -7,6 +7,33 @@ type BaseInfoModel {
   version: String!
 }
 
+type CategoryModel {
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  slug: String!
+  thumbnailUrl: String!
+  title: String!
+  updatedAt: DateTime!
+}
+
+type CategoryWithStreamsModel {
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  slug: String!
+  streams: [StreamModel!]!
+  thumbnailUrl: String!
+  title: String!
+  updatedAt: DateTime!
+}
+
+input ChangeChatSettingsInput {
+  isChatEnabled: Boolean!
+  isChatFollowersOnly: Boolean!
+  isChatPremiumOnly: Boolean!
+}
+
 input ChangeEmailInput {
   newEmail: String!
   newEmailToken: String
@@ -27,10 +54,19 @@ input ChangeProfileInfoInput {
 input ChangeStreamInfoInput {
   categoryId: String
   id: ID!
-  isArchived: Boolean
   isPrivate: Boolean
   password: String
   title: String
+}
+
+type ChatMessageModel {
+  createdAt: DateTime!
+  id: ID!
+  streamId: ID!
+  text: String!
+  updatedAt: DateTime!
+  user: UserModel!
+  userId: ID!
 }
 
 input CreateUserInput {
@@ -70,6 +106,15 @@ input FiltersInput {
   searchTerm: String
 }
 
+input GenerateStreamTokenInput {
+  channelId: String!
+  userId: ID!
+}
+
+type GenerateStreamTokenModel {
+  token: String!
+}
+
 type LocationModel {
   city: String!
   country: String!
@@ -91,6 +136,7 @@ type MetaModel {
 
 type Mutation {
   addSocialLink(data: SocialLinkInput!): Boolean!
+  changeChatSetting(data: ChangeChatSettingsInput!): Boolean!
   changeEmail(data: ChangeEmailInput!): Boolean!
   changePassword(data: ChangePasswordInput!): Boolean!
   changeProfileAvatar(avatar: Upload!): Boolean!
@@ -101,6 +147,7 @@ type Mutation {
   deactivateAccount(data: DeactivateAccountInput!): UserModel!
   disableTotp: Boolean!
   enableTotp(data: EnableTotpInput!): Boolean!
+  generateStreamToken(data: GenerateStreamTokenInput!): GenerateStreamTokenModel!
   loginUser(data: LoginInput!): UserModel!
   logoutUser: Boolean!
   newPassword(data: NewPasswordInput!): Boolean!
@@ -111,6 +158,7 @@ type Mutation {
   removeStreamThumbnail(id: String!): Boolean!
   reorderSocialLinks(data: [SocialLinkOrderInput!]!): Boolean!
   resetPassword(data: ResetPasswordInput!): Boolean!
+  sendChatMessage(data: SendMessageInput!): ChatMessageModel!
   sendLinkToOldEmail: Boolean!
   updateSocialLink(data: SocialLinkInput!, id: String!): Boolean!
   verifyAccount(data: VerificationInput!): Boolean!
@@ -122,17 +170,26 @@ input NewPasswordInput {
 }
 
 type Query {
-  findAllStreams(filters: FiltersInput!): StreamResponseModel!
+  findAllCategories: [CategoryModel!]!
+  findAllStreams(filters: FiltersInput!): StreamAndMetaModel!
+  findCategoryBySlug(slug: String!): CategoryWithStreamsModel!
   findCurrentSession: SessionModel!
   findProfile: UserModel!
-  findRandomStream: StreamModel!
+  findRandomCategories(count: Float!): [CategoryModel!]!
+  findRandomStreams: [StreamModel!]!
   findSessionsByUser: [SessionModel!]!
+  findStreamMessages(streamId: String!): [ChatMessageModel!]!
   generateTotpSecret: TotpModel!
   mySocialLinks: [SocialLinkModel!]!
 }
 
 input ResetPasswordInput {
   email: String!
+}
+
+input SendMessageInput {
+  streamId: ID!
+  text: String!
 }
 
 type SessionMetadataModel {
@@ -168,36 +225,35 @@ input SocialLinkOrderInput {
   postition: Float!
 }
 
+type StreamAndMetaModel {
+  items: [StreamModel!]!
+  meta: MetaModel!
+}
+
 type StreamModel {
-  archiveUrl: String
+  category: CategoryModel!
   categoryId: String
   createdAt: DateTime!
   description: String
-  duration: Int!
-  endedAt: DateTime!
   id: ID!
   ingressId: String
-  isArchived: Boolean!
+  isChatEnabled: Boolean!
+  isChatFollowersOnly: Boolean!
+  isChatPremiumOnly: Boolean!
   isLive: Boolean!
   isPrivate: Boolean
-  isScheduled: Boolean
   password: String
-  peakViewersCount: Int!
-  scheduledStartAt: DateTime
   serverUrl: String
-  startedAt: DateTime!
   streamKey: String
   thumbnailId: String
   thumbnailUrl: String
   title: String!
   updatedAt: DateTime!
   userId: String!
-  viewersCount: Int!
 }
 
-type StreamResponseModel {
-  items: [StreamModel!]!
-  meta: MetaModel!
+type Subscription {
+  chatMessageAdded(streamId: String!): ChatMessageModel!
 }
 
 type TotpModel {

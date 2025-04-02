@@ -1,15 +1,16 @@
 import { Field, ID, InputType } from "@nestjs/graphql"
-import { IsNotEmpty, IsString } from "class-validator"
+import { IsNotEmpty, IsString, MaxLength } from "class-validator"
 
 @InputType()
-export class GenerateStreamTokenInput {
+export class SendMessageInput {
 	@Field(() => ID)
 	@IsString()
 	@IsNotEmpty()
-	userId: string
+	streamId: string
 
 	@Field()
 	@IsString()
 	@IsNotEmpty()
-	channelId: string
+	@MaxLength(300)
+	text: string
 }

@@ -6,7 +6,7 @@ import { AccountService } from "./account.service"
 import { ChangePasswordInput } from "./inputs/change-password.input"
 import { UserModel } from "./models/user.model"
 
-@Resolver()
+@Resolver("Account")
 export class AccountResolver {
 	constructor(private readonly accountService: AccountService) {}
 

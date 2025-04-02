@@ -33,9 +33,8 @@ model User {
   tokens         Token[]
   actionAttempts ActionAttempt[]
 
-  stream Stream?
-
-  viewingSessions StreamViewer[]
+  stream       Stream?
+  chatMessages ChatMessage[]
 
   sponsorshipPlans SponsorshipPlan[]
 

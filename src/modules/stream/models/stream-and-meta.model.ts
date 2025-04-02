@@ -3,7 +3,7 @@ import { MetaModel } from "./meta.model"
 import { StreamModel } from "./stream.model"
 
 @ObjectType()
-export class StreamResponseModel {
+export class StreamAndMetaModel {
 	@Field(() => [StreamModel])
 	items: StreamModel[]
 

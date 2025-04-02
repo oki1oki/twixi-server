@@ -1,6 +1,7 @@
 import { Field, ID, Int } from "@nestjs/graphql"
 import { ObjectType } from "@nestjs/graphql"
 import { Stream } from "@prisma/client"
+import { CategoryModel } from "src/modules/category/models/category.model"
 
 @ObjectType()
 export class StreamModel implements Stream {
@@ -30,6 +31,18 @@ export class StreamModel implements Stream {
 
 	@Field(() => Boolean)
 	isLive: boolean
+
+	@Field(() => Boolean)
+	isChatEnabled: boolean
+
+	@Field(() => Boolean)
+	isChatFollowersOnly: boolean
+
+	@Field(() => Boolean)
+	isChatPremiumOnly: boolean
+
+	@Field(() => CategoryModel)
+	category: CategoryModel
 
 	@Field({ nullable: true })
 	categoryId: string

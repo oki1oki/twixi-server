@@ -1,11 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { Prisma } from "@prisma/client"
+import { FastifyRequest } from "fastify"
 import Upload from "graphql-upload/Upload.mjs"
 import { AccessToken } from "livekit-server-sdk"
 import sharp from "sharp"
 import { PrismaService } from "src/core/prisma/prisma.service"
 import { StorageService } from "src/modules/libs/storage/storage.service"
+import { generateViewerName } from "src/shared/utils/generate-viewer-name.util"
 import { ChangeStreamInfoInput } from "./inputs/change-stream-info.input"
 import { GenerateStreamTokenInput } from "./inputs/generate-stream-token.input"
 
@@ -31,7 +33,8 @@ export class StreamService {
 				...whereClause
 			},
 			include: {
-				user: true
+				user: true,
+				category: true
 			},
 
 			take: limit,
@@ -83,17 +86,26 @@ export class StreamService {
 			}
 		})
 
-		const randomIndex = Math.floor(Math.random() * total)
+		if (total === 0) return []
 
-		const randomStream = await this.prismaService.stream.findFirst({
+		const count = Math.min(4, total)
+		const randomIndexes = new Set<number>()
+
+		while (randomIndexes.size < count) {
+			randomIndexes.add(Math.floor(Math.random() * total))
+		}
+
+		const streams = await this.prismaService.stream.findMany({
 			where: {
 				user: { isDeactivated: false }
 			},
-			take: 1,
-			skip: randomIndex
+			include: {
+				user: true,
+				category: true
+			}
 		})
 
-		return randomStream
+		return Array.from(randomIndexes).map(index => streams[index])
 	}
 
 	async changeInfo(input: ChangeStreamInfoInput) {
@@ -160,7 +172,7 @@ export class StreamService {
 		return true
 	}
 
-	async generateToken(input: GenerateStreamTokenInput) {
+	async generateToken(req: FastifyRequest, input: GenerateStreamTokenInput) {
 		const { userId, channelId } = input
 
 		let self: { id: string; username: string }
@@ -174,7 +186,7 @@ export class StreamService {
 		} else {
 			self = {
 				id: userId,
-				username: `Зритель ${Math.floor(Math.random() * 1000000)}`
+				username: generateViewerName(req.headers.language)
 			}
 		}
 

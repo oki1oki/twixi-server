@@ -7,7 +7,7 @@ import { UserModel } from "./account/models/user.model"
 import { AuthService } from "./auth.service"
 import { LoginInput } from "./session/inputs/login.input"
 
-@Resolver()
+@Resolver("Auth")
 export class AuthResolver {
 	constructor(private readonly authService: AuthService) {}
 

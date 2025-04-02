@@ -3,9 +3,13 @@ import { Module } from "@nestjs/common"
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { GraphQLModule } from "@nestjs/graphql"
 import { AuthModule } from "src/modules/auth/auth.module"
+import { CategoryModule } from "src/modules/category/category.module"
+import { ChatModule } from "src/modules/chat/chat.module"
 import { CronModule } from "src/modules/cron/cron.module"
 import { LibsModule } from "src/modules/libs/libs.module"
 import { ProfileModule } from "src/modules/profile/profile.module"
+import { StreamModule } from "src/modules/stream/stream.module"
+import { WebhookModule } from "src/modules/webhook/webhook.module"
 import { getGraphQLConfig } from "./config/graphql.config"
 import { PrismaModule } from "./prisma/prisma.module"
 import { RedisModule } from "./redis/redis.module"
@@ -23,7 +27,11 @@ import { RedisModule } from "./redis/redis.module"
 		RedisModule,
 		AuthModule,
 		CronModule,
-		ProfileModule
+		ProfileModule,
+		StreamModule,
+		WebhookModule,
+		CategoryModule,
+		ChatModule
 	]
 })
 export class CoreModule {}

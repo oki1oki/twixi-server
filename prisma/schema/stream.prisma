@@ -11,6 +11,12 @@ model Stream {
 
     isLive Boolean @default(false) @map("is_live")
 
+    chatMessage ChatMessage[]
+
+    isChatEnabled       Boolean @default(true) @map("is_chat_enabled")
+    isChatFollowersOnly Boolean @default(false) @map("is_chat_followers_only")
+    isChatPremiumOnly   Boolean @default(false) @map("is_chat_premium_only")
+
     categoryId String?   @map("category_id")
     category   Category? @relation(fields: [categoryId], references: [id])
 
@@ -18,9 +24,7 @@ model Stream {
     password  String? @map("password")
 
     userId String? @unique @map("user_id")
-    user   User?   @relation(fields: [userId], references: [id])
-
-    streamViewers StreamViewer[]
+    user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
@@ -28,19 +32,18 @@ model Stream {
     @@map("streams")
 }
 
-model StreamViewer {
+model ChatMessage {
     id String @id @default(cuid())
 
-    userId String? @map("user_id")
-    user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+    text   String
+    userId String @map("user_id")
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    sessionId String @unique @map("session_id")
+    streamId String @map("stream_id")
+    stream   Stream @relation(fields: [streamId], references: [id], onDelete: Cascade)
 
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    streamId String @unique @map("stream_id")
-    stream   Stream @relation(fields: [streamId], references: [id])
-
-    @@map("stream_viewers")
+    @@map("chat_messages")
 }

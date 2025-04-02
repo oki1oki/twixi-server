@@ -5,7 +5,7 @@ import { NewPasswordInput } from "./inputs/new-password.input"
 import { ResetPasswordInput } from "./inputs/reset-password.input"
 import { PasswordRecoveryService } from "./password-recovery.service"
 
-@Resolver()
+@Resolver("PasswordRecovery")
 export class PasswordRecoveryResolver {
 	constructor(
 		private readonly passwordRecoveryService: PasswordRecoveryService

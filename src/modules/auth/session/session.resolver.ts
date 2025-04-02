@@ -4,7 +4,7 @@ import type { GQLContext } from "src/shared/utils/types/gql-context.type"
 import { SessionModel } from "./models/session.model"
 import { SessionService } from "./session.service"
 
-@Resolver()
+@Resolver("Session")
 export class SessionResolver {
 	constructor(private readonly sessionService: SessionService) {}
 

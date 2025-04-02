@@ -8,7 +8,7 @@ import { UserModel } from "../account/models/user.model"
 import { DeactivateService } from "./deactivate.service"
 import { DeactivateAccountInput } from "./inputs/deactivate-account.input"
 
-@Resolver()
+@Resolver("Deactivate")
 export class DeactivateResolver {
 	constructor(private readonly deactivateService: DeactivateService) {}
 

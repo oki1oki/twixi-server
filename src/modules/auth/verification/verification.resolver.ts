@@ -4,7 +4,7 @@ import type { GQLContext } from "src/shared/utils/types/gql-context.type"
 import { VerificationInput } from "./inputs/verification.input"
 import { VerificationService } from "./verification.service"
 
-@Resolver()
+@Resolver("Verification")
 export class VerificationResolver {
 	constructor(private readonly verificationService: VerificationService) {}
 

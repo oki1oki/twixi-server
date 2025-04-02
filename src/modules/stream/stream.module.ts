@@ -1,10 +1,11 @@
 import { Module } from "@nestjs/common"
+import { IngressModule } from "./ingress/ingress.module"
 import { StreamResolver } from "./stream.resolver"
 import { StreamService } from "./stream.service"
-import { IngressModule } from './ingress/ingress.module';
 
 @Module({
+	imports: [IngressModule],
 	providers: [StreamResolver, StreamService],
-	imports: [IngressModule]
+	exports: [StreamService]
 })
 export class StreamModule {}
