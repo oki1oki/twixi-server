@@ -16,6 +16,8 @@ model User {
   displayName String @map("display_name")
   password    String
 
+  telegramId String? @unique @map("telegram_id")
+
   isVerified      Boolean @default(false) @map("is_verified")
   isEmailVerified Boolean @default(false) @map("is_email_verified")
 
@@ -29,18 +31,22 @@ model User {
   bio    String?
 
   socialLinks    SocialLink[]
-  notifications  Notification[]
   tokens         Token[]
   actionAttempts ActionAttempt[]
 
   stream       Stream?
   chatMessages ChatMessage[]
 
+  notifications        Notification[]
+  notificationSettings NotificationSettings?
+
   sponsorshipPlans SponsorshipPlan[]
+
+  followers  Follow[] @relation(name: "followers")
+  followings Follow[] @relation(name: "followings")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  streamId  String?
 
   @@map("users")
 }
@@ -59,4 +65,22 @@ model SocialLink {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("social_links")
+}
+
+model Follow {
+  id String @id @default(cuid())
+
+  followerId String @map("follower_id")
+  follower   User   @relation(name: "followers", fields: [followerId], references: [id], onDelete: Cascade)
+
+  followingId String @map("following_id")
+  following   User   @relation(name: "followings", fields: [followingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@map("follows")
 }

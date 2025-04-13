@@ -1,12 +1,14 @@
 import { Injectable } from "@nestjs/common"
+import { PrismaService } from "src/core/prisma/prisma.service"
 import { LivekitService } from "../libs/livekit/livekit.service"
-import { StreamService } from "../stream/stream.service"
+import { NotificationService } from "../notification/notification.service"
 
 @Injectable()
 export class WebhookService {
 	constructor(
 		private readonly livekitService: LivekitService,
-		private readonly streamService: StreamService
+		private readonly prismaService: PrismaService,
+		private readonly notificationService: NotificationService
 	) {}
 
 	async receiveWebhook(body: string, authToken: string) {
@@ -16,14 +18,63 @@ export class WebhookService {
 			true
 		)
 
-		const isLive = event.event === "ingress_started"
-		if (["ingress_started", "ingress_ended"].includes(event.event)) {
-			await this.streamService.handleStreamLiveStatus(
-				event.ingressInfo.ingressId,
-				isLive
-			)
+		if (event.event === "ingress_started") {
+			const stream = await this.prismaService.stream.update({
+				where: {
+					ingressId: event.ingressInfo.ingressId
+				},
+				data: {
+					isLive: true
+				},
+				include: {
+					user: true
+				}
+			})
+
+			const followers = await this.prismaService.follow.findMany({
+				where: {
+					followingId: stream.user.id,
+					follower: {
+						isDeactivated: false
+					}
+				},
+				include: {
+					follower: {
+						include: {
+							notificationSettings: true
+						}
+					}
+				}
+			})
+
+			for (const follow of followers) {
+				const follower = follow.follower
+
+				if (follower.notificationSettings.siteNotifications) {
+					await this.notificationService.createStreamStart(
+						follower.id,
+						stream.user
+					)
+				}
+			}
 		}
 
+		if (event.event === "ingress_ended") {
+			const stream = await this.prismaService.stream.update({
+				where: {
+					ingressId: event.ingressInfo.ingressId
+				},
+				data: {
+					isLive: false
+				}
+			})
+
+			await this.prismaService.chatMessage.deleteMany({
+				where: {
+					streamId: stream.id
+				}
+			})
+		}
 		return event
 	}
 }

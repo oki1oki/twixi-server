@@ -40,7 +40,7 @@ async function main() {
 			const createdUser = await prisma.user.create({
 				data: {
 					username,
-					email: `${username}@twixi.ru`,
+					email: `${username}@twixi.com`,
 					password: await hash("12345678"),
 					displayName: username,
 					avatar: `/channels/${username}.webp`,
@@ -61,6 +61,12 @@ async function main() {
 							]
 						}
 					}
+				}
+			})
+
+			await prisma.notificationSettings.create({
+				data: {
+					userId: createdUser.id
 				}
 			})
 

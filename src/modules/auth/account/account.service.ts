@@ -71,6 +71,16 @@ export class AccountService {
 			}
 		})
 
+		await this.prismaService.notificationSettings.create({
+			data: {
+				user: {
+					connect: {
+						id: user.id
+					}
+				}
+			}
+		})
+
 		await this.verificationService.sendVerificationToken(user)
 
 		return true

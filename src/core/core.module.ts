@@ -4,9 +4,12 @@ import { ConfigModule, ConfigService } from "@nestjs/config"
 import { GraphQLModule } from "@nestjs/graphql"
 import { AuthModule } from "src/modules/auth/auth.module"
 import { CategoryModule } from "src/modules/category/category.module"
+import { ChannelModule } from "src/modules/channel/channel.module"
 import { ChatModule } from "src/modules/chat/chat.module"
 import { CronModule } from "src/modules/cron/cron.module"
+import { FollowModule } from "src/modules/follow/follow.module"
 import { LibsModule } from "src/modules/libs/libs.module"
+import { NotificationModule } from "src/modules/notification/notification.module"
 import { ProfileModule } from "src/modules/profile/profile.module"
 import { StreamModule } from "src/modules/stream/stream.module"
 import { WebhookModule } from "src/modules/webhook/webhook.module"
@@ -31,7 +34,10 @@ import { RedisModule } from "./redis/redis.module"
 		StreamModule,
 		WebhookModule,
 		CategoryModule,
-		ChatModule
+		ChatModule,
+		FollowModule,
+		ChannelModule,
+		NotificationModule
 	]
 })
 export class CoreModule {}

@@ -40,6 +40,16 @@ input ChangeEmailInput {
   oldEmailToken: String!
 }
 
+input ChangeNotificationSettingsInput {
+  siteNotifications: Boolean!
+  telegramNotifications: Boolean!
+}
+
+type ChangeNotificationSettingsResponse {
+  notificationSettings: NotificationSettingsModel!
+  telegramAuthToken: String
+}
+
 input ChangePasswordInput {
   newPassword: String!
   oldPassword: String!
@@ -106,6 +116,16 @@ input FiltersInput {
   searchTerm: String
 }
 
+type FollowModel {
+  createdAt: DateTime!
+  follower: UserModel!
+  followerId: String!
+  following: UserModel!
+  followingId: String!
+  id: ID!
+  updatedAt: DateTime!
+}
+
 input GenerateStreamTokenInput {
   channelId: String!
   userId: ID!
@@ -138,6 +158,7 @@ type Mutation {
   addSocialLink(data: SocialLinkInput!): Boolean!
   changeChatSetting(data: ChangeChatSettingsInput!): Boolean!
   changeEmail(data: ChangeEmailInput!): Boolean!
+  changeNotificationSettings(data: ChangeNotificationSettingsInput!): ChangeNotificationSettingsResponse!
   changePassword(data: ChangePasswordInput!): Boolean!
   changeProfileAvatar(avatar: Upload!): Boolean!
   changeProfileInfo(data: ChangeProfileInfoInput!): Boolean!
@@ -147,6 +168,7 @@ type Mutation {
   deactivateAccount(data: DeactivateAccountInput!): UserModel!
   disableTotp: Boolean!
   enableTotp(data: EnableTotpInput!): Boolean!
+  followChannel(channelId: String!): Boolean!
   generateStreamToken(data: GenerateStreamTokenInput!): GenerateStreamTokenModel!
   loginUser(data: LoginInput!): UserModel!
   logoutUser: Boolean!
@@ -160,6 +182,7 @@ type Mutation {
   resetPassword(data: ResetPasswordInput!): Boolean!
   sendChatMessage(data: SendMessageInput!): ChatMessageModel!
   sendLinkToOldEmail: Boolean!
+  unfollowChannel(channelId: String!): Boolean!
   updateSocialLink(data: SocialLinkInput!, id: String!): Boolean!
   verifyAccount(data: VerificationInput!): Boolean!
 }
@@ -169,16 +192,52 @@ input NewPasswordInput {
   token: String!
 }
 
+type NotificationModel {
+  createdAt: DateTime!
+  id: ID!
+  isRead: Boolean!
+  message: String!
+  type: NotificationType!
+  updatedAt: DateTime!
+  user: UserModel!
+  userId: String!
+}
+
+type NotificationSettingsModel {
+  createdAt: DateTime!
+  id: ID!
+  siteNotifications: Boolean!
+  telegramNotifications: Boolean!
+  updatedAt: DateTime!
+  user: UserModel!
+  userId: String!
+}
+
+enum NotificationType {
+  ENABLE_TWO_FACTOR
+  NEW_FOLLOWER
+  NEW_SPONSORSHIP
+  STREAM_START
+  VERIFIED_CHANNEL
+}
+
 type Query {
   findAllCategories: [CategoryModel!]!
   findAllStreams(filters: FiltersInput!): StreamAndMetaModel!
   findCategoryBySlug(slug: String!): CategoryWithStreamsModel!
+  findChannelByUsername(username: String!): UserModel!
+  findChannelFollowersCount(channelId: String!): Float!
   findCurrentSession: SessionModel!
+  findMyFollowers: [FollowModel!]!
+  findMyFollowings: [FollowModel!]!
   findProfile: UserModel!
   findRandomCategories(count: Float!): [CategoryModel!]!
   findRandomStreams: [StreamModel!]!
+  findRecommendedChannels: [UserModel!]!
   findSessionsByUser: [SessionModel!]!
   findStreamMessages(streamId: String!): [ChatMessageModel!]!
+  findUnreadNotificationsCount: Float!
+  findUserNotifications: [NotificationModel!]!
   generateTotpSecret: TotpModel!
   mySocialLinks: [SocialLinkModel!]!
 }
@@ -271,14 +330,20 @@ type UserModel {
   deacivatedAt: DateTime!
   displayName: String!
   email: String!
+  followers: [FollowModel!]!
+  followings: [FollowModel!]!
   id: ID!
   isDeactivated: Boolean!
   isEmailVerified: Boolean!
   isTotpEnable: Boolean!
   isVerified: Boolean!
+  notificationSettings: NotificationSettingsModel!
+  notifications: [NotificationModel!]!
   password: String!
   socialLinks: [SocialLinkModel!]!
+  stream: StreamModel!
   streamId: ID
+  telegramId: String
   totpSecret: String!
   updatedAt: DateTime!
   username: String!

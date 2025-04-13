@@ -217,28 +217,6 @@ export class StreamService {
 
 		return { token: token.toJwt() }
 	}
-	async handleStreamLiveStatus(ingressId: string, isLive: boolean) {
-		const stream = await this.findStreamByIngressId(ingressId)
-
-		if (!stream) {
-			throw new NotFoundException("Стрим не найден")
-		}
-
-		await this.updateStreamLiveStatus(ingressId, isLive)
-	}
-
-	private async findStreamByIngressId(ingressId: string) {
-		return this.prismaService.stream.findUnique({
-			where: { ingressId }
-		})
-	}
-
-	private async updateStreamLiveStatus(ingressId: string, isLive: boolean) {
-		await this.prismaService.stream.update({
-			where: { ingressId },
-			data: { isLive }
-		})
-	}
 
 	private searchTermClause(searchTerm: string): Prisma.StreamWhereInput {
 		return {
